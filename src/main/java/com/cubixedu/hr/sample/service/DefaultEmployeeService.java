@@ -1,12 +1,14 @@
 package com.cubixedu.hr.sample.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.cubixedu.hr.sample.config.HrConfigProperties;
 import com.cubixedu.hr.sample.model.Employee;
 
 @Service
+@Qualifier("default")
 public class DefaultEmployeeService implements EmployeeService {
 	@Autowired
 	HrConfigProperties config;

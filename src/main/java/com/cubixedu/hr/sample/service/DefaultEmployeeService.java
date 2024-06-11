@@ -9,7 +9,7 @@ import com.cubixedu.hr.sample.model.Employee;
 
 @Service
 @Qualifier("default")
-public class DefaultEmployeeService implements EmployeeService {
+public class DefaultEmployeeService extends AbstractEmployeeService {
 	@Autowired
 	HrConfigProperties config;
 

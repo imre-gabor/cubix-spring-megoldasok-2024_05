@@ -7,23 +7,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cubixedu.hr.sample.model.Employee;
+import com.cubixedu.hr.sample.model.Position;
 import com.cubixedu.hr.sample.repository.EmployeeRepository;
+import com.cubixedu.hr.sample.repository.PositionRepository;
 
 public abstract class AbstractEmployeeService implements EmployeeService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
 	
+	@Autowired
+	private PositionRepository positionRepository;
+	
 	@Override
 	public Employee save(Employee employee) {
+		adjustPosition(employee);
+		
 		return employeeRepository.save(employee);
+	}
+
+	private void adjustPosition(Employee employee) {
+		Position position = null;
+		String positionName = employee.getPosition().getName();
+		if(positionName != null) {
+			List<Position> positions = positionRepository.findByName(positionName);
+			if(positions.isEmpty()) {
+				position = positionRepository.save(employee.getPosition());
+			} else {
+				position = positions.get(0);
+			}
+		}
+		employee.setPosition(position);
 	}
 
 	@Override
 	public Employee update(Employee employee) {
-		if(employeeRepository.existsById(employee.getEmployeeId()))		
+		if(employeeRepository.existsById(employee.getEmployeeId())) {
+			adjustPosition(employee);
 			return employeeRepository.save(employee);
-		else
+		} else
 			return null;
 	}
 

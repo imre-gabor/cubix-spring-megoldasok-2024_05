@@ -11,8 +11,9 @@ public class PositionDetailsByCompany {
 	@Id
 	@GeneratedValue
 	private long id;
-	private int minSalary;
 	
+	private int minSalary;
+		
 	@ManyToOne
 	private Company company;
 	

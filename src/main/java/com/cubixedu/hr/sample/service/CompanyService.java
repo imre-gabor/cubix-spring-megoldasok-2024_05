@@ -25,7 +25,7 @@ public class CompanyService {
 	}
 
 	public Company update(Company company) {
-		if(companyRepository.existsById(company.getId()))		
+		if(companyRepository.existsById(company.getId()))
 			return companyRepository.save(company);
 		else
 			return null;

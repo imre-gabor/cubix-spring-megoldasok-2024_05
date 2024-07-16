@@ -20,10 +20,12 @@ public class CompanyService {
 	@Autowired
 	private EmployeeService employeeService;
 	
+	@Transactional
 	public Company save(Company company) {
 		return companyRepository.save(company);
 	}
 
+	@Transactional
 	public Company update(Company company) {
 		if(companyRepository.existsById(company.getId()))
 			return companyRepository.save(company);
@@ -39,30 +41,32 @@ public class CompanyService {
 		return companyRepository.findById(id);
 	}
 
+	@Transactional
 	public void delete(long id) {
 		companyRepository.deleteById(id);
 	}
 	
-	
+	@Transactional
 	public Company addEmployee(long id, Employee employee) {
-		Company company = companyRepository.findById(id).get();
-		company.addEmployee(employee);
-		employeeService.save(employee);
+		Company company = companyRepository.findByIdWithEmployees(id).get();
+		Employee savedEmployee = employeeService.save(employee);
+		company.addEmployee(savedEmployee);
 		return company;
 	}	
 	
+	@Transactional
 	public Company deleteEmployee(long id, long employeeId) {
-		Company company = companyRepository.findById(id).get();
+		Company company = companyRepository.findByIdWithEmployees(id).get();
 		Employee employee = employeeService.findById(employeeId).get();
 		employee.setCompany(null);
 		company.getEmployees().remove(employee);
-		employeeService.save(employee);
+		//employeeService.save(employee); --> @Transactional miatt az employee menedzselt állapotú, sav nem szükséges
 		return company;
 	}
 	
 	@Transactional
 	public Company replaceEmployees(long id, List<Employee> employees) {
-		Company company = companyRepository.findById(id).get();
+		Company company = companyRepository.findByIdWithEmployees(id).get();
 		company.getEmployees().forEach(e -> {
 			e.setCompany(null);
 		});

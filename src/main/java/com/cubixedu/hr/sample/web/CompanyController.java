@@ -46,10 +46,12 @@ public class CompanyController {
 	@GetMapping
 	public List<CompanyDto> findAll(@RequestParam Optional<Boolean> full) {
 		
-		List<Company> companies = companyService.findAll();
+		List<Company> companies = null;
 		if(full.orElse(false)) {
+			companies = companyRepository.findAllWithEmployees();
 			return companyMapper.companiesToDtos(companies);
 		} else {
+			companies = companyService.findAll();
 			return companyMapper.companiesToSummaryDtos(companies);
 		}
 	}
@@ -72,7 +74,11 @@ public class CompanyController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<CompanyDto> findById(@PathVariable long id, @RequestParam Optional<Boolean> full) {
-		Company company = companyService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		
+		Optional<Company> optionalCompany = full.orElse(false) 
+				? companyRepository.findByIdWithEmployees(id)
+				: companyService.findById(id);
+		Company company = optionalCompany.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		return ResponseEntity.ok(
 				full.orElse(false) ? 
 				companyMapper.companyToDto(company)

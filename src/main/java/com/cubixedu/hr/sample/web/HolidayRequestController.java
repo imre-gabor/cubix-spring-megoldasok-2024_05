@@ -6,7 +6,9 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 //import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,13 +56,13 @@ public class HolidayRequestController {
 
 	@PostMapping(value = "/search")
 	public List<HolidayRequestDto> findByExample(@RequestBody HolidayRequestFilterDto example, 
-			Pageable pageable) {
+			@SortDefault("id") Pageable pageable) {
 		Page<HolidayRequest> page = holidayRequestService.findHolidayRequestsByExample(example, pageable);
 		return holidayRequestMapper.holidayRequestsToDtos(page.getContent());
 	}
 
 	@PostMapping
-	//@PreAuthorize("#newHolidayRequest.employeeId == authentication.principal.employee.employeeId")
+	@PreAuthorize("#newHolidayRequest.employeeId == authentication.principal.employee.employeeId")
 	public HolidayRequestDto addHolidayRequest(@RequestBody @Valid HolidayRequestDto newHolidayRequest) {
 		HolidayRequest holidayRequest;
 		try {
@@ -72,6 +74,7 @@ public class HolidayRequestController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("#modifiedHolidayRequest.employeeId == authentication.principal.employee.employeeId")
 	public HolidayRequestDto modifyHolidayRequest(@PathVariable long id, @RequestBody @Valid HolidayRequestDto modifiedHolidayRequest) {
 		modifiedHolidayRequest.setEmployeeId(id);
 		HolidayRequest holidayRequest;
@@ -97,11 +100,11 @@ public class HolidayRequestController {
 		}
 	}
 
-	@PutMapping(value = "/{id}/approval", params = { "status", "approverId" })
-	public HolidayRequestDto approveHolidayRequest(@PathVariable long id, @RequestParam long approverId, @RequestParam boolean status) {
+	@PutMapping(value = "/{id}/approval", params = { "status"})
+	public HolidayRequestDto approveHolidayRequest(@PathVariable long id, @RequestParam boolean status) {
 		HolidayRequest holidayRequest;
 		try {
-			holidayRequest = holidayRequestService.approveHolidayRequest(id, approverId, status);
+			holidayRequest = holidayRequestService.approveHolidayRequest(id, status);
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
